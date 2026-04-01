@@ -1,5 +1,9 @@
 <template>
     <div class="user-register-wrapper">
+        <!-- AI Background Image -->
+        <div class="bg-image-layer"></div>
+        <div class="bg-overlay"></div>
+
         <!-- Canvas for Particles -->
         <canvas id="particle-canvas" ref="particleCanvas"></canvas>
 
@@ -171,7 +175,7 @@ export default {
                     if (this.$toast) {
                         this.$toast.success(res.data.message);
                     }
-                    this.$router.push('/nguoi-dung/trang-chinh');
+                    this.$router.push('/nguoi-dung/dang-nhap');
                 } else {
                     if (this.$toast) {
                         this.$toast.error(res.data.message || 'Đăng ký thất bại!');
@@ -286,6 +290,29 @@ export default {
     position: relative;
     overflow: hidden;
     padding: 20px;
+}
+
+.bg-image-layer {
+    position: absolute;
+    inset: 0;
+    background-image: url('/ai_login_bg.png');
+    background-size: cover;
+    background-position: center;
+    filter: blur(6px) brightness(0.5) saturate(1.3);
+    transform: scale(1.05);
+    z-index: 0;
+}
+
+.bg-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(2, 6, 23, 0.7) 0%,
+        rgba(15, 23, 42, 0.55) 50%,
+        rgba(2, 6, 23, 0.75) 100%
+    );
+    z-index: 1;
 }
 
 #particle-canvas {

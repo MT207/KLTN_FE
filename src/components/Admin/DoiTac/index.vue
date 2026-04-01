@@ -39,7 +39,8 @@
                                     <td class="align-middle text-center">{{ value.so_dien_thoai }}</td>
                                     <td class="align-middle">{{ value.dia_chi }}</td>
                                     <td class="align-middle text-center" v-on:click="changeStatus(value)">
-                                        <button v-if="value.trang_thai == 1" class="btn btn-info w-100" style="color: white;">
+                                        <button v-if="value.trang_thai == 1" class="btn btn-info w-100"
+                                            style="color: white;">
                                             Hoạt động
                                         </button>
                                         <button v-else class="btn btn-secondary w-100">
@@ -48,7 +49,8 @@
                                     </td>
                                     <td class="align-middle text-center">
                                         <button v-on:click="edit_doi_tac = Object.assign(edit_doi_tac, value)"
-                                            class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#updateModal">
+                                            class="btn btn-success me-2" data-bs-toggle="modal"
+                                            data-bs-target="#updateModal">
                                             Cập nhật
                                         </button>
                                         <button v-on:click="del_doi_tac = value" class="btn btn-danger"
@@ -110,7 +112,8 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" v-on:click="themDoiTac()">Thêm mới</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" v-on:click="themDoiTac()">Thêm
+                        mới</button>
                 </div>
             </div>
         </div>
@@ -153,7 +156,9 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-success" data-bs-dismiss="modal" v-on:click="capNhatDoiTac()">Cập nhật</button>
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal"
+                        v-on:click="capNhatDoiTac()">Cập
+                        nhật</button>
                 </div>
             </div>
         </div>
@@ -174,7 +179,8 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal" v-on:click="xoaDoiTac()">Xác nhận</button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal" v-on:click="xoaDoiTac()">Xác
+                        nhận</button>
                 </div>
             </div>
         </div>

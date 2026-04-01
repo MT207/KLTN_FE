@@ -1,5 +1,9 @@
 <template>
     <div class="user-login-wrapper">
+        <!-- AI Background Image -->
+        <div class="bg-image-layer"></div>
+        <div class="bg-overlay"></div>
+
         <!-- Canvas for Particles -->
         <canvas id="particle-canvas" ref="particleCanvas"></canvas>
 
@@ -100,7 +104,6 @@
 
 <script>
 import axios from 'axios';
-
 export default {
     name: 'DangNhapNguoiDung',
     data() {
@@ -130,12 +133,10 @@ export default {
             try {
                 const res = await axios.post('http://127.0.0.1:8000/api/nguoi-dung/login', this.nguoi_dung);
                 if (res.data.status) {
-                    // Lưu token
                     localStorage.setItem('token_nguoi_dung', res.data.data.token);
-                    // Lưu id_nguoi_dung
-                    localStorage.setItem('thong_tin_user', JSON.stringify(res.data.data.user));
                     if (this.$toast) {
                         this.$toast.success('Đăng nhập thành công!');
+                        localStorage.setItem('thong_tin_user', JSON.stringify(res.data.data.user));
                     }
                     this.$router.push('/nguoi-dung/trang-chinh');
                 } else {
@@ -252,6 +253,29 @@ export default {
     position: relative;
     overflow: hidden;
     padding: 20px;
+}
+
+.bg-image-layer {
+    position: absolute;
+    inset: 0;
+    background-image: url('/ai_login_bg.png');
+    background-size: cover;
+    background-position: center;
+    filter: blur(6px) brightness(0.5) saturate(1.3);
+    transform: scale(1.05); /* prevents blur edge artifacts */
+    z-index: 0;
+}
+
+.bg-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(2, 6, 23, 0.7) 0%,
+        rgba(15, 23, 42, 0.55) 50%,
+        rgba(2, 6, 23, 0.75) 100%
+    );
+    z-index: 1;
 }
 
 #particle-canvas {

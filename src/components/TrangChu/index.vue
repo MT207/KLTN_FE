@@ -1,7 +1,5 @@
 <template>
     <div class="homepage">
-
-
         <!-- Hero Section -->
         <section class="hero-section text-white py-5 position-relative"
             style="background-color: #0d121c; min-height: 85vh; display: flex; align-items: center;">
@@ -12,7 +10,7 @@
                             style="background-color: rgba(6, 182, 212, 0.1);">
                             <i class="bx bxs-circle me-2" style="color: #06b6d4; font-size: 10px;"></i>
                             <span class="fw-medium text-info" style="font-size: 13px; color: #06b6d4 !important;">Công
-                                nghệ AI tiên tiến nhất 2024</span>
+                                nghệ AI tiên tiến nhất 2026</span>
                         </div>
                         <h1 class="display-3 fw-bold mb-4 pe-lg-5" style="line-height: 1.1;">
                             Phòng họp trực tuyến <span class="text-white">&</span> <br>

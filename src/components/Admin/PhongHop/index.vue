@@ -24,6 +24,7 @@
                                 <th class="text-center">#</th>
                                 <th class="text-center">Mã Phòng</th>
                                 <th class="text-center">Tên Phòng</th>
+                                <th class="text-center">Người Tạo</th>
                                 <th class="text-center">Số Người Tối Đa</th>
                                 <th class="text-center">Thời Gian Bắt Đầu</th>
                                 <th class="text-center">Thời Gian Kết Thúc</th>
@@ -32,28 +33,27 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <template v-for="(value, index) in list_phong_hop" :key="index">
-                                <tr class="text-nowrap">
-                                    <th class="align-middle text-center">{{ index + 1 }}</th>
-                                    <td class="align-middle text-center">{{ value.ma_phong }}</td>
-                                    <td class="align-middle">{{ value.ten_phong }}</td>
-                                    <td class="align-middle text-center">{{ value.so_nguoi_toi_da }}</td>
-                                    <td class="align-middle text-center">{{ value.thoi_gian_bat_dau }}</td>
-                                    <td class="align-middle text-center">{{ value.thoi_gian_ket_thuc }}</td>
-                                    <td class="align-middle text-center" v-on:click="changeStatus(value)">
-                                        <button v-if="value.trang_thai == 1" class="btn btn-info w-100"
-                                            style="color:white">Hoạt động</button>
-                                        <button v-else class="btn btn-secondary w-100">Tạm tắt</button>
-                                    </td>
-                                    <td class="align-middle text-center">
-                                        <button v-on:click="edit_phong_hop = Object.assign(edit_phong_hop, value)"
-                                            class="btn btn-success me-2" data-bs-toggle="modal"
-                                            data-bs-target="#updateModal">Cập nhật</button>
-                                        <button v-on:click="del_phong_hop = value" class="btn btn-danger"
-                                            data-bs-toggle="modal" data-bs-target="#deleteModal">Xóa</button>
-                                    </td>
-                                </tr>
-                            </template>
+                            <tr class="text-nowrap" v-for="(value, index) in list_phong_hop" :key="index">
+                                <th class="align-middle text-center">{{ index + 1 }}</th>
+                                <td class="align-middle text-center">{{ value.ma_phong }}</td>
+                                <td class="align-middle">{{ value.ten_phong }}</td>
+                                <td class="align-middle text-center">{{ value.ten_chu_phong }}</td>
+                                <td class="align-middle text-center">{{ value.so_nguoi_toi_da }}</td>
+                                <td class="align-middle text-center">{{ value.thoi_gian_bat_dau }}</td>
+                                <td class="align-middle text-center">{{ value.thoi_gian_ket_thuc }}</td>
+                                <td class="align-middle text-center" v-on:click="changeStatus(value)">
+                                    <button v-if="value.trang_thai == 1" class="btn btn-info w-100"
+                                        style="color:white">Hoạt động</button>
+                                    <button v-else class="btn btn-secondary w-100">Tạm tắt</button>
+                                </td>
+                                <td class="align-middle text-center">
+                                    <button v-on:click="edit_phong_hop = Object.assign(edit_phong_hop, value)"
+                                        class="btn btn-success me-2" data-bs-toggle="modal"
+                                        data-bs-target="#updateModal">Cập nhật</button>
+                                    <button v-on:click="del_phong_hop = value" class="btn btn-danger"
+                                        data-bs-toggle="modal" data-bs-target="#deleteModal">Xóa</button>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -78,6 +78,14 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Tên Phòng</label>
                             <input v-model="create_phong_hop.ten_phong" type="text" class="form-control" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Người Tạo (Đối Tác)</label>
+                            <select v-model="create_phong_hop.id_doi_tac" class="form-select">
+                                <option value="" disabled>-- Chọn Đối Tác --</option>
+                                <option v-for="(dt, idx) in list_doi_tac" :key="idx" :value="dt.id">{{ dt.ho_va_ten }}
+                                </option>
+                            </select>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Số Người Tối Đa</label>
@@ -129,6 +137,14 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Tên Phòng</label>
                             <input v-model="edit_phong_hop.ten_phong" type="text" class="form-control" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Người Tạo (Đối Tác)</label>
+                            <select v-model="edit_phong_hop.id_doi_tac" class="form-select">
+                                <option value="" disabled>-- Chọn Đối Tác --</option>
+                                <option v-for="(dt, idx) in list_doi_tac" :key="idx" :value="dt.id">{{ dt.ho_va_ten }}
+                                </option>
+                            </select>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Số Người Tối Đa</label>
@@ -192,14 +208,22 @@ export default {
     data() {
         return {
             list_phong_hop: [],
-            create_phong_hop: { ma_phong: "", ten_phong: "", so_nguoi_toi_da: "", thoi_gian_bat_dau: "", thoi_gian_ket_thuc: "", trang_thai: "1" },
-            edit_phong_hop: { ma_phong: "", ten_phong: "", so_nguoi_toi_da: "", thoi_gian_bat_dau: "", thoi_gian_ket_thuc: "", trang_thai: "" },
+            list_doi_tac: [],
+            create_phong_hop: { ma_phong: "", ten_phong: "", so_nguoi_toi_da: "", thoi_gian_bat_dau: "", thoi_gian_ket_thuc: "", trang_thai: "1", id_doi_tac: "" },
+            edit_phong_hop: { ma_phong: "", ten_phong: "", so_nguoi_toi_da: "", thoi_gian_bat_dau: "", thoi_gian_ket_thuc: "", trang_thai: "", id_doi_tac: "" },
             del_phong_hop: {},
             tim_kiem: {},
         };
     },
-    mounted() { this.loadData(); },
+    mounted() {
+        this.loadData();
+        this.loadDoiTac();
+    },
     methods: {
+        loadDoiTac() {
+            axios.get('http://127.0.0.1:8000/api/doi-tac/data')
+                .then((res) => { this.list_doi_tac = res.data.data; });
+        },
         timKiem() {
             axios.post("http://127.0.0.1:8000/api/phong-hop/tim-kiem", this.tim_kiem)
                 .then((res) => { this.list_phong_hop = res.data.data; });
@@ -213,6 +237,7 @@ export default {
                 .then((res) => {
                     if (res.data.status) {
                         this.$toast.success(res.data.message);
+                        this.create_phong_hop = { ma_phong: "", ten_phong: "", so_nguoi_toi_da: "", thoi_gian_bat_dau: "", thoi_gian_ket_thuc: "", trang_thai: "1", id_doi_tac: "" };
                         this.loadData();
                     }
                     else this.$toast.error(res.data.message);

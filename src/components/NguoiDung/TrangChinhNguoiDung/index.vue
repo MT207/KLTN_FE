@@ -83,36 +83,52 @@
 
                 <!-- Right Actions -->
                 <div class="d-flex align-items-center gap-3">
-                    <button
-                        class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center bg-white border position-relative shadow-sm"
+                    <button class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center bg-white border position-relative shadow-sm"
                         style="width: 44px; height: 44px; border-color: #e2e8f0 !important;">
                         <i class='bx bxs-bell fs-5' style="color: #334155;"></i>
                     </button>
-                    <button
-                        class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center bg-white border shadow-sm"
+                    <button class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center bg-white border shadow-sm"
                         style="width: 44px; height: 44px; border-color: #e2e8f0 !important;">
                         <i class='bx bxs-message-square-dots fs-5' style="color: #334155;"></i>
                     </button>
 
-                    <div class="border-start ms-2 ps-4 d-flex align-items-center" style="border-color: #e2e8f0 !important;">
-                        <div class="text-end me-3 d-none d-md-block">
-                            <h6 class="mb-0 fw-bolder" style="font-size: 0.95rem; color: #0f172a;">
-                                {{ ten_nguoi_dung }}
-                            </h6>
-                            
-                            <small v-if="da_xac_minh" class="fw-bold" style="font-size: 0.75rem; color: #ea580c;">
-                                <i class='bx bxs-check-shield'></i> Đã xác minh danh tính
-                            </small>
-                            <small v-else class="fw-bold" style="font-size: 0.75rem; color: #64748b;">
-                                <i class='bx bx-error-circle'></i> Chưa xác minh
-                            </small>
-                        </div>
+                    <div class="position-relative border-start ms-2 ps-4 d-flex align-items-center" style="border-color: #e2e8f0 !important;">
                         
-                        <img src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=150&q=80"
-                            alt="Profile" class="rounded-circle border border-2 shadow-sm" width="46" height="46"
-                            :style="{ borderColor: '#fff !important', outline: da_xac_minh ? '2px solid #ea580c' : '2px solid #cbd5e1' }">
+                        <div @click.stop="showDropdown = !showDropdown" class="d-flex align-items-center user-profile-link" style="cursor: pointer;">
+                            <div class="text-end me-3 d-none d-md-block">
+                                <h6 class="mb-0 fw-bolder" style="font-size: 0.95rem; color: #0f172a;">
+                                    {{ ten_nguoi_dung }}
+                                </h6>
+                                
+                                <small v-if="da_xac_minh" class="fw-bold" style="font-size: 0.75rem; color: #ea580c;">
+                                    <i class='bx bxs-check-shield'></i> Đã xác minh danh tính
+                                </small>
+                                <small v-else class="fw-bold" style="font-size: 0.75rem; color: #64748b;">
+                                    <i class='bx bx-error-circle'></i> Chưa xác minh
+                                </small>
+                            </div>
+                            
+                            <img src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=150&q=80"
+                                alt="Profile" class="rounded-circle border border-2 shadow-sm" width="46" height="46"
+                                :style="{ borderColor: '#fff !important', outline: da_xac_minh ? '2px solid #ea580c' : '2px solid #cbd5e1' }">
+                        </div>
+
+                        <div v-if="showDropdown" 
+                            class="position-absolute end-0 bg-white shadow-lg border rounded-3 py-2 animate__animated animate__fadeInUp" 
+                            style="top: 120%; width: 180px; z-index: 1050; border-color: #f1f5f9 !important;">
+                            
+                            <div class="px-3 py-2 border-bottom mb-1">
+                                <span class="text-muted" style="font-size: 0.7rem; text-transform: uppercase; font-weight: 700;">Tài khoản</span>
+                            </div>
+
+                            <button @click="dang_xuat" class="dropdown-item px-3 py-2 d-flex align-items-center text-danger fw-bold border-0 bg-transparent w-100 text-start">
+                                <i class="bx bx-log-out-circle me-2 fs-5"></i>
+                                <span>Đăng xuất</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
+                <!--  -->
             </header>
 
             <!-- Scrollable Content Area -->
@@ -735,13 +751,19 @@
                                                 <div class="scan-line-circle"></div>
                                             </template>
                                         </div>
+                                        <div class="mt-3 text-center" style="min-height: 24px;">
+                                            <small v-if="isScanning" class="status-text-anim" :style="{ color: isScanning ? '#ea580c' : '#64748b' }">
+                                                <i class='bx bx-loader-alt bx-spin me-1'></i>
+                                                {{ scanStatus }}
+                                            </small>
+                                        </div>
                                     </div>
-
+                                    
                                     <div class="col-md-7">
                                         <span class="badge mb-3 fw-bold px-3 py-2"
                                             style="background-color: #fef9c3; color: #854d0e; font-size: 0.75rem; border-radius: 20px;">
                                             <i class="bx bxs-circle me-1" style="font-size: 0.5rem; vertical-align: middle; color: #ca8a04;"></i>
-                                            Yêu cầu cấu hình
+                                            Yêu cầu xác thực
                                         </span>
                                         <h4 class="fw-bolder mb-2" style="color: #0f172a; font-size: 1.3rem; line-height: 1.3;">
                                             Bảo mật cuộc họp với Face ID AI
@@ -780,7 +802,8 @@ export default {
     data() {
         return {
             currentTab: 'dashboard',
-
+            dem_thoi_gian: 0, // Biến đếm thời gian quét
+            giay_can_thiet: 15,
             settings: {
                 ho_va_ten: '',
                 email: '',
@@ -790,13 +813,13 @@ export default {
             },
             // --- Khối 1: Các biến trạng thái AI ---
             isScanning: false, // Dang quet hay khong
-            scanStatus: 'Chua bat dau quet', // Dong chu thong bao trang thai
+            scanStatus: '', // Dong chu thong bao trang thai
             detectedFaces: 0, // So luong mat phat hien duoc
             faceSaved: false, // Da luu mat len server chua
             luong_video: null, // Luu tru media stream tu webcam
             vong_lap_nhan_dien: null, // Dung de dung setInterval khi thoi quet
-            da_xac_minh_phu: false
-
+            da_xac_minh_phu: false,
+            showDropdown: false
         }
     },
     mounted() {
@@ -804,6 +827,10 @@ export default {
         if (user && user.du_lieu_khuon_mat) {
             this.da_xac_minh_phu = true;
         }
+        // Đóng dropdown khi click ra ngoài
+        window.addEventListener('click', () => {
+            this.showDropdown = false;
+        });
     },
     computed: {
         id_nguoi_dung() {
@@ -840,11 +867,19 @@ export default {
         }
     },
     methods: {
-        
+        dang_xuat() {
+            localStorage.removeItem('token_nguoi_dung');
+            localStorage.removeItem('thong_tin_user');
+            
+            if (this.$toast) {
+                this.$toast.success("Đã đăng xuất");
+            }
+
+            this.$router.push('/');
+        },
         toggleDropdown() {
             this.showDropdown = !this.showDropdown;
         },
-       
         // --- Khối 2: Tai mo hinh AI (Models) ---
         // tai cac file tu thu muc public/models
         async tai_mo_hinh_ai() {
@@ -907,31 +942,43 @@ export default {
             faceapi.matchDimensions(canvas, kich_thuoc_hien_thi);
 
             this.vong_lap_nhan_dien = setInterval(async () => {
-                // Quet khuon mat
-                const ket_qua = await faceapi.detectAllFaces(
-                    video, 
-                    new faceapi.TinyFaceDetectorOptions()
-                ).withFaceLandmarks().withFaceDescriptors();
+            const ket_qua = await faceapi.detectAllFaces(
+                video, 
+                new faceapi.TinyFaceDetectorOptions()
+            ).withFaceLandmarks().withFaceDescriptors();
 
-                this.detectedFaces = ket_qua.length;
-                this.scanStatus = ket_qua.length === 0 ? 'Chua phat hien khuon mat' : 'Dang nhan dien...';
+            this.detectedFaces = ket_qua.length;
 
-                // Ve khung len canvas
-                const ket_qua_da_chinh_kich_thuoc = faceapi.resizeResults(ket_qua, kich_thuoc_hien_thi);
-                const ctx = canvas.getContext('2d');
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                faceapi.draw.drawDetections(canvas, ket_qua_da_chinh_kich_thuoc);
+            // Xóa vẽ ô vuông xanh (Xóa dòng drawDetections cũ)
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                // Neu tim thay dung 1 khuon mat thi tien hanh luu
-                if (ket_qua.length === 1 && !this.faceSaved) {
+            if (ket_qua.length === 1) {
+                // Tăng biến đếm
+                this.dem_thoi_gian++;
+                
+                // Tính toán phần trăm
+                let phan_tram = Math.min(Math.round((this.dem_thoi_gian / this.giay_can_thiet) * 100), 100);
+                
+                // CẬP NHẬT TRẠNG THÁI (Chỉ cập nhật dòng này khi có 1 mặt)
+                this.scanStatus = `Đang phân tích sinh trắc học... ${phan_tram}%`;
+
+                if (this.dem_thoi_gian >= this.giay_can_thiet && !this.faceSaved) {
                     this.faceSaved = true;
-                    this.scanStatus = 'Da tim thay khuon mat! Dang luu...';
+                    this.scanStatus = "Xác nhận thực thể sống thành công!";
                     const véc_tơ_khuon_mat = Array.from(ket_qua[0].descriptor);
                     this.gui_du_lieu_len_laravel(véc_tơ_khuon_mat);
-                } else if (ket_qua.length > 1) {
-                    this.scanStatus = 'Chi duoc phep co 1 nguoi!';
                 }
-            }, 200); // Quet moi 200ms
+            } else {
+                // RESET nếu không thấy mặt hoặc quá nhiều mặt
+                this.dem_thoi_gian = 0; 
+                if (ket_qua.length === 0) {
+                    this.scanStatus = 'Vui lòng đưa mặt vào khung hình';
+                } else {
+                    this.scanStatus = 'Cảnh báo: Phát hiện quá nhiều người!';
+                }
+            }
+        }, 200);
         },
         // --- Khối 5: Gui du lieu ve Database (Laravel) ---
         async gui_du_lieu_len_laravel(mang_so) {
@@ -968,7 +1015,7 @@ export default {
                     // Lấy thông báo "Khuôn mặt đã tồn tại..." từ Backend
                     const thong_bao_loi = loi.response.data.message;
                     this.scanStatus = thong_bao_loi;
-                    this.$toast.error(thong_bao_loi);
+                    this.$toast.warning(thong_bao_loi);
                 } else {
                     this.scanStatus = 'Lỗi kết nối server!';
                     this.$toast.error("Có lỗi xảy ra, vui lòng thử lại.");
@@ -1023,6 +1070,28 @@ export default {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+.user-profile-link:hover h6 {
+    color: #ea580c !important; /* Đổi màu tên khi rê chuột vào */
+}
+
+.dropdown-item {
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: #fff1f2; /* Màu đỏ rất nhạt */
+    color: #be123c !important; /* Đỏ đậm hơn khi hover */
+}
+
+/* Hiệu ứng hiện ra mượt mà nếu không dùng thư viện animate.css */
+.animate__fadeInUp {
+    animation: fadeInUp 0.2s ease-out;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 /* Thanh laser cho khung hinh tron */
 .scan-line-circle {
     position: absolute;
@@ -1033,7 +1102,11 @@ export default {
     z-index: 12;
     animation: scan-vertical 2s ease-in-out infinite;
 }
-
+.status-text-anim {
+    font-weight: bold;
+    color: #ea580c;
+    transition: all 0.3s ease;
+}
 @keyframes scan-vertical {
     0% { top: 10%; opacity: 0; }
     50% { top: 50%; opacity: 1; }
