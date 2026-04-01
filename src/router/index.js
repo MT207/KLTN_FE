@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from "vue-router"; // cài vue-router:
 import { createToaster } from "@meforma/vue-toaster";
 
 const toaster = createToaster({ position: "top-right" });
-
+// middleware Admin
 const checkAdmin = (to, from, next) => {
     const tokenAdmin = localStorage.getItem('token_admin');
     if (!tokenAdmin) {
@@ -11,6 +11,24 @@ const checkAdmin = (to, from, next) => {
         next('/admin/dang-nhap');
     } else {
         next();
+    }
+};
+// middleware user trước khi vào phòng họp
+const checkUserMeeting = (to, from, next) => {
+    // 1. Kiểm tra xem đã đăng nhập chưa
+    const thong_tin = localStorage.getItem('thong_tin_user');
+    
+    // 2. Kiểm tra xem có vé (token) LiveKit chưa
+    const livekitToken = sessionStorage.getItem('livekit_token');
+
+    if (!thong_tin) {
+        toaster.warning('Vui lòng đăng nhập để sử dụng tính năng này!');
+        next('/nguoi-dung/dang-nhap');
+    } else if (!livekitToken) {
+        toaster.error('Lỗi bảo mật: Bạn chưa được cấp quyền truy cập phòng họp này!');
+        next('/nguoi-dung/trang-chinh'); // Đuổi về trang chủ để quét Face ID lại
+    } else {
+        next(); // Cho phép qua cửa
     }
 };
 
@@ -111,7 +129,13 @@ const routes = [
         component: () => import('../components/NguoiDung/TrangChinhNguoiDung/index.vue'),
         meta: { layout: 'black' }
     },
-
+    // Phong Hop
+    {
+        path: '/phong-hop/:id', // :id là tham số động (mã phòng)
+        component: () => import('../components/NguoiDung/PhongHopVideo/index.vue'),
+        meta: { layout: 'black' }, // Dùng layout đen cho ngầu, giống Zoom
+        beforeEnter: checkUserMeeting 
+    },
 
     //Doi Tac
     {

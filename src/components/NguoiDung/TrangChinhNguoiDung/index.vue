@@ -442,51 +442,36 @@
                                         </h4>
                                     </div>
 
-                                    <form>
-                                        <!-- Meeting Title -->
+                                    <form @submit.prevent="taoPhongHop">
                                         <div class="mb-4">
-                                            <label class="form-label fw-bold mb-2 text-muted"
-
-                                                style="font-size: 0.75rem; letter-spacing: 1px;">TIÊU ĐỀ CUỘC HỌP</label>
-                                            <input type="text"
+                                            <label class="form-label fw-bold mb-2 text-muted" style="font-size: 0.75rem; letter-spacing: 1px;">TIÊU ĐỀ CUỘC HỌP</label>
+                                            <input type="text" v-model="formTaoPhong.ten_phong" required
                                                 class="form-control form-control-lg bg-light border-0 shadow-none px-3 py-3"
                                                 placeholder="ví dụ, Đồng bộ nhóm hàng tuần"
                                                 style="border-radius: 12px; font-size: 0.95rem; color: #475569;">
                                         </div>
-
-                                        <!-- Description -->
                                         <div class="mb-4">
-                                            <label class="form-label fw-bold mb-2 text-muted"
-
-                                                style="font-size: 0.75rem; letter-spacing: 1px;">MÔ TẢ</label>
-                                            <textarea
+                                            <label class="form-label fw-bold mb-2 text-muted" style="font-size: 0.75rem; letter-spacing: 1px;">MÔ TẢ</label>
+                                            <textarea v-model="formTaoPhong.mo_ta"
                                                 class="form-control form-control-lg bg-light border-0 shadow-none px-3 py-3"
                                                 rows="4" placeholder="Phác thảo chương trình nghị sự cuộc họp hoặc mục tiêu..."
                                                 style="border-radius: 12px; font-size: 0.95rem; color: #475569; resize: none;"></textarea>
                                         </div>
-
-                                        <!-- Participants -->
                                         <div class="mb-5">
-                                            <label class="form-label fw-bold mb-2 text-muted"
-
-                                                style="font-size: 0.75rem; letter-spacing: 1px;">MỜI NGƯỜI THAM GIA
-                                            </label>
+                                            <label class="form-label fw-bold mb-2 text-muted" style="font-size: 0.75rem; letter-spacing: 1px;">MỜI NGƯỜI THAM GIA</label>
                                             <div class="position-relative">
-                                                <i class='bx bx-at position-absolute top-50 translate-middle-y fs-5'
-                                                    style="left: 1rem; color: #94a3b8;"></i>
-                                                <input type="text"
+                                                <i class='bx bx-at position-absolute top-50 translate-middle-y fs-5' style="left: 1rem; color: #94a3b8;"></i>
+                                                <input type="text" v-model="formTaoPhong.email_khach_moi"
                                                     class="form-control form-control-lg bg-light border-0 shadow-none ps-5 py-3"
-
                                                     placeholder="Thêm địa chỉ email được phân tách bằng dấu phẩy"
                                                     style="border-radius: 12px; font-size: 0.95rem; color: #475569;">
                                             </div>
                                         </div>
-
-                                        <!-- Create Button -->
-                                        <button type="button" class="btn text-white fw-bold px-4 py-3"
+                                        <button type="submit" class="btn text-white fw-bold px-4 py-3 d-flex justify-content-center align-items-center"
+                                            :disabled="isCreating"
                                             style="background-color: #ea580c; border-radius: 8px; font-size: 1rem; min-width: 180px;">
-
-                                            Tạo cuộc họp
+                                            <span v-if="isCreating" class="spinner-border spinner-border-sm me-2"></span>
+                                            {{ isCreating ? 'Đang khởi tạo...' : 'Tạo cuộc họp' }}
                                         </button>
                                     </form>
                                 </div>
@@ -496,23 +481,18 @@
                             <div class="col-lg-5">
                                 <!-- Join Meeting Mini Card -->
                                 <div class="card border-0 shadow-sm p-4 text-center mb-5" style="border-radius: 16px;">
-                                    <div class="d-flex align-items-center mb-4">
-                                        <div class="d-flex justify-content-center align-items-center rounded me-3 shadow-sm"
-                                            style="background-color: #fff7ed; width: 44px; height: 44px;">
-                                            <i class="bx bxs-keyboard fs-4" style="color: #ea580c;"></i>
-                                        </div>
-
-                                        <h5 class="fw-bolder mb-0 text-dark">Tham gia cuộc họp</h5>
-                                    </div>
                                     <div class="d-flex gap-3">
                                         <div class="flex-grow-1">
-                                            <input type="text"
+                                            <input type="text" v-model="ma_phong_tham_gia"
                                                 class="form-control bg-light border-0 shadow-none h-100 ps-3 fw-medium"
-                                                placeholder="ID: 000-000-000"
+                                                placeholder="Ví dụ: u2c-c1t5-etj"
                                                 style="font-size: 0.95rem; border-radius: 8px; color: #475569;">
                                         </div>
-                                        <button class="btn text-white fw-bold px-4"
-                                            style="background-color: #ea580c; border-radius: 8px;">Join</button>
+                                        <button @click="kiemTraTruocKhiJoin" :disabled="isJoining" class="btn text-white fw-bold px-4"
+                                            style="background-color: #ea580c; border-radius: 8px;">
+                                            <span v-if="isJoining" class="spinner-border spinner-border-sm"></span>
+                                            <span v-else>Join</span>
+                                        </button>
                                     </div>
                                 </div>
 
@@ -792,6 +772,56 @@
             </div>
         </main>
     </div>
+    <!-- Modal xác thực khuôn mặt -->
+      <div v-if="showJoinAuthModal" class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center z-3" style="background-color: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px);">
+        <div class="card border-0 shadow-lg p-4 text-center animate__animated animate__fadeInUp" style="border-radius: 24px; width: 420px; background-color: #1e293b; border: 1px solid #334155 !important;">
+            <template v-if="!isMatched">
+                <h4 class="text-white fw-bolder mb-3">Xác nhận danh tính</h4>
+                <p class="text-secondary small mb-4">Hệ thống đang đối chiếu sinh trắc học để bảo mật cuộc họp.</p>
+
+                <div class="position-relative mx-auto mb-4" style="width: 220px; height: 220px;">
+                    <video ref="authVideo" autoplay muted playsinline class="w-100 h-100 rounded-circle object-fit-cover shadow-lg" 
+                        :style="{ border: authError ? '4px solid #ef4444' : '4px solid #ea580c', transform: 'scaleX(-1)' }"></video>
+                    <div v-if="!authError" class="scan-line-circle"></div>
+                </div>
+
+                <div class="mb-4" style="min-height: 24px;">
+                    <p class="fw-bold mb-0" :style="{ color: authError ? '#ef4444' : '#ea580c' }">
+                        <i v-if="authError" class='bx bx-error-circle fs-5 align-middle me-1'></i>
+                        <i v-else class='bx bx-loader-alt bx-spin fs-5 align-middle me-1'></i>
+                        {{ authScanStatus }}
+                    </p>
+                </div>
+
+                <button @click="dongModalXacThucJoin" class="btn btn-link text-secondary text-decoration-none fw-medium">
+                    Hủy bỏ
+                </button>
+            </template>
+
+            <template v-else>
+                <div class="py-4 animate__animated animate__zoomIn">
+                    <div class="mx-auto mb-4 d-flex justify-content-center align-items-center rounded-circle" 
+                        style="width: 100px; height: 100px; background-color: #f0fdf4;">
+                        <i class='bx bxs-check-shield' style="font-size: 4rem; color: #22c55e;"></i>
+                    </div>
+                    
+                    <h3 class="text-white fw-bolder mb-2">Xác thực thành công!</h3>
+                    <p class="text-secondary mb-4">Chào mừng <b>{{ ten_nguoi_dung }}</b>. Hệ thống đã xác nhận danh tính của bạn.</p>
+
+                    <div class="d-grid gap-2">
+                        <button @click="thamGiaPhongHop" :disabled="isJoining" class="btn text-white fw-bold py-3 shadow-lg" 
+                                style="background-color: #ea580c; border-radius: 12px; font-size: 1.1rem;">
+                            <span v-if="isJoining" class="spinner-border spinner-border-sm me-2"></span>
+                            <template v-else><i class='bx bx-video me-2'></i> Tham gia phòng họp</template>
+                        </button>
+                        <button @click="dongModalXacThucJoin" class="btn btn-link text-secondary text-decoration-none small">
+                            Để sau
+                        </button>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -811,6 +841,14 @@ export default {
                 new_password: '',
                 confirm_password: '',
             },
+            formTaoPhong: {
+                ten_phong: '',
+                mo_ta: '',
+                email_khach_moi: ''
+            },
+            isCreating: false,
+            ma_phong_tham_gia: '', // Lưu mã phòng người dùng nhập vào
+            isJoining: false,
             // --- Khối 1: Các biến trạng thái AI ---
             isScanning: false, // Dang quet hay khong
             scanStatus: '', // Dong chu thong bao trang thai
@@ -819,7 +857,14 @@ export default {
             luong_video: null, // Luu tru media stream tu webcam
             vong_lap_nhan_dien: null, // Dung de dung setInterval khi thoi quet
             da_xac_minh_phu: false,
-            showDropdown: false
+            showDropdown: false,
+            // --- Khối 7: Modal Xác thực trước khi Join vào phòng ---
+            showJoinAuthModal: false,
+            authScanStatus: 'Đang khởi động camera...',
+            authError: false,
+            authStream: null,
+            authInterval: null,
+            isMatched: false, // biến này để tránh quét trúng nhiều lần
         }
     },
     mounted() {
@@ -1025,6 +1070,236 @@ export default {
                 this.faceSaved = false; 
                 this.isScanning = false; // Dừng camera để họ bấm quét lại từ đầu
                 console.error(loi);
+            }
+        },
+        // Khối 6: Quản Lý Phòng Họp
+        async taoPhongHop() {
+        // Kiểm tra validation cơ bản
+            if (!this.formTaoPhong.ten_phong.trim()) {
+                if (this.$toast) this.$toast.error("Vui lòng nhập tiêu đề cuộc họp!");
+                return;
+            }
+
+            if (!this.id_nguoi_dung) {
+                if (this.$toast) this.$toast.error("Lỗi: Không xác định được danh tính của bạn.");
+                return;
+            }
+            this.isCreating = true;
+
+            try {
+                // Chuẩn bị dữ liệu gửi lên (Map với các cột trong DB)
+                const payload = {
+                    ten_phong: this.formTaoPhong.ten_phong,
+                    id_chu_phong: this.id_nguoi_dung,
+                    so_nguoi_toi_da: 100, 
+                    // mo_ta: this.formTaoPhong.mo_ta (Nếu DB bạn có cột này thì bật lên)
+                };
+
+                const response = await axios.post('http://127.0.0.1:8000/api/phong-hop/create', payload);
+
+                if (response.data.status) {
+                    if (this.$toast) this.$toast.success("Khởi tạo phòng họp thành công!");
+                    
+                    const phongMoi = response.data.data;
+                    console.log("Mã phòng vừa tạo:", phongMoi.ma_phong);
+
+                    // Tạm thời hiển thị mã phòng bằng Alert để bạn copy dễ dàng
+                    alert(`TẠO THÀNH CÔNG!\n\nMã phòng của bạn là: ${phongMoi.ma_phong}\nHãy copy mã này để tham gia.`);
+
+                    // Reset form sau khi tạo xong
+                    this.formTaoPhong.ten_phong = '';
+                    this.formTaoPhong.mo_ta = '';
+                    this.formTaoPhong.email_khach_moi = '';
+                }
+            } catch (error) {
+                console.error("Lỗi khi tạo phòng:", error);
+                if (this.$toast) this.$toast.error("Hệ thống bận, không thể tạo phòng lúc này.");
+            } finally {
+                this.isCreating = false;
+            }
+        },
+        async thamGiaPhongHop() {
+            // 1. Kiểm tra xem người dùng đã nhập mã phòng chưa
+            if (!this.ma_phong_tham_gia.trim()) {
+                if (this.$toast) this.$toast.warning("Vui lòng nhập mã phòng họp!");
+                return;
+            }
+            // 2. BẢO MẬT BẰNG AI: Chặn cửa nếu chưa quét Face ID
+            if (!this.da_xac_minh) {
+                if (this.$toast) this.$toast.error("Bảo mật: Vui lòng xác thực khuôn mặt trước khi vào họp!");
+                // Tự động chuyển họ về tab Dashboard để quét mặt
+                this.currentTab = 'dashboard'; 
+                return;
+            }
+            this.isJoining = true;
+
+            try {
+                // 3. Gọi API Laravel để lấy vé (Token) vào LiveKit
+                const payload = {
+                    ma_phong: this.ma_phong_tham_gia.trim(),
+                    user_name: this.ten_nguoi_dung
+                };
+
+                const response = await axios.post('http://127.0.0.1:8000/api/phong-hop/tao-token', payload);
+
+                if (response.data.status) {
+                    // 4. Lấy token thành công
+                    const token = response.data.token;
+                    
+                    // Lưu token tạm thời vào sessionStorage để mang sang trang Video Call
+                    sessionStorage.setItem('livekit_token', token);
+                    sessionStorage.setItem('livekit_room', this.ma_phong_tham_gia.trim());
+
+                    if (this.$toast) this.$toast.success("Kết nối an toàn thành công! Đang vào phòng...");
+
+                    // 5. Chuyển hướng sang trang hiển thị Video Call (bạn sẽ tạo trang này tiếp theo)
+                    this.$router.push(`/phong-hop/${this.ma_phong_tham_gia.trim()}`);
+                }
+            } catch (error) {
+                console.error("Lỗi khi tham gia phòng:", error);
+                if (this.$toast) {
+                    this.$toast.error("Mã phòng không tồn tại hoặc hệ thống từ chối kết nối.");
+                }
+            } finally {
+                this.isJoining = false;
+            }
+        },
+        kiemTraTruocKhiJoin() {
+            if (!this.ma_phong_tham_gia.trim()) {
+                this.$toast.warning("Vui lòng nhập mã phòng họp!");
+                return;
+            }
+            if (!this.da_xac_minh) {
+                this.$toast.error("Vui lòng đăng ký Face ID trước khi tham gia!");
+                this.currentTab = 'dashboard';
+                return;
+            }
+            // Mở Modal và kích hoạt Camera
+            this.showJoinAuthModal = true;
+            this.authError = false;
+            this.authScanStatus = 'Đang tải dữ liệu sinh trắc học...';
+            
+            // Đợi Vue render DOM (thẻ video) xong thì mới bật cam
+            this.$nextTick(() => {
+                this.batDauXacThucJoin();
+            });
+        },
+
+        async batDauXacThucJoin() {
+            const tai_xong = await this.tai_mo_hinh_ai();
+            if (!tai_xong) return;
+
+            this.authScanStatus = 'Đang kết nối camera...';
+            
+            try {
+                this.authStream = await navigator.mediaDevices.getUserMedia({ video: {} });
+                const video = this.$refs.authVideo;
+                video.srcObject = this.authStream;
+
+                video.onloadedmetadata = () => {
+                    video.play();
+                    this.tienHanhSoSanhKhuonMat(video);
+                };
+            } catch (loi) {
+                this.authError = true;
+                this.authScanStatus = 'Lỗi truy cập camera!';
+            }
+        },
+
+        tienHanhSoSanhKhuonMat(video) 
+        {
+            // Lấy véc-tơ chuẩn đã lưu trong LocalStorage (được đồng bộ từ DB)
+            const userData = JSON.parse(localStorage.getItem('thong_tin_user'));
+            const savedVectorArray = JSON.parse(userData.du_lieu_khuon_mat);
+            const savedDescriptor = new Float32Array(savedVectorArray);
+
+            this.authScanStatus = 'Vui lòng nhìn thẳng vào camera...';
+            this.isMatched = false;
+
+            this.authInterval = setInterval(async () => {
+                // 1. CHẶN NGAY TỪ ĐẦU: Nếu đã khớp rồi thì dừng mọi xử lý quét mặt
+                if (this.isMatched) return; 
+
+                // Lấy véc-tơ của khuôn mặt hiện tại trên camera
+                const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+                                                .withFaceLandmarks()
+                                                .withFaceDescriptors();
+
+                if (detections.length === 1) {
+                    const liveDescriptor = detections[0].descriptor;
+                    
+                    // SO SÁNH: Tính khoảng cách Euclidean giữa 2 véc-tơ
+                    const distance = faceapi.euclideanDistance(savedDescriptor, liveDescriptor);
+                    
+                    // Ngưỡng 0.5 là mức độ an toàn cao (càng nhỏ càng giống)
+                    if (distance < 0.50) {
+                        this.isMatched = true; // Đánh dấu đã quét trúng
+                        clearInterval(this.authInterval); // Dừng vòng lặp
+                        this.authInterval = null;
+
+                        this.authError = false;
+                        this.authScanStatus = "Xác nhận thành công!";
+                        
+                        // Tắt camera modal
+                        this.dongModalXacThucJoin(false); 
+                        
+                        
+                        // Đợi 800ms để nhả camera phần cứng, sau đó mới gọi API và chuyển trang
+                        
+                        
+                        // ĐÃ XÓA CÁC DÒNG CODE BỊ LẶP Ở ĐÂY
+                    } 
+                    else {
+                        this.authError = true;
+                        this.authScanStatus = "Khuôn mặt không khớp dữ liệu gốc!";
+                    }
+                } else if (detections.length > 1) {
+                    this.authError = true;
+                    this.authScanStatus = "Phát hiện nhiều hơn 1 khuôn mặt!";
+                } else {
+                    this.authError = false;
+                    this.authScanStatus = 'Đang tìm kiếm khuôn mặt...';
+                }
+            }, 300); // Quét 300ms một lần
+        },
+
+        dongModalXacThucJoin(an_modal = true) {
+            if (this.authInterval) {
+                clearInterval(this.authInterval);
+                this.authInterval = null;
+            }
+            if (this.authStream) {
+                this.authStream.getTracks().forEach(track => track.stop());
+                this.authStream = null;
+            }
+            if (an_modal) {
+                this.showJoinAuthModal = false;
+            }
+        },
+
+        // Sửa lại hàm thamGiaPhongHop cũ một chút: Bỏ phần check da_xac_minh đi vì đã check ở hàm trên rồi
+        async thamGiaPhongHop() {
+            this.isJoining = true;
+            try {
+                const payload = {
+                    ma_phong: this.ma_phong_tham_gia.trim(),
+                    user_name: this.ten_nguoi_dung
+                };
+                const response = await axios.post('http://127.0.0.1:8000/api/phong-hop/tao-token', payload);
+
+                if (response.data.status) {
+                    sessionStorage.setItem('livekit_token', response.data.token);
+                    sessionStorage.setItem('livekit_room', this.ma_phong_tham_gia.trim());
+                    if (this.$toast) this.$toast.success("Đang tham gia phòng họp");
+                    
+                    // Ẩn modal và sang phòng
+                    this.showJoinAuthModal = false;
+                    window.location.href = `/phong-hop/${this.ma_phong_tham_gia.trim()}`;
+                }
+            } catch (error) {
+                if (this.$toast) this.$toast.error("Mã phòng không tồn tại hoặc lỗi server.");
+            } finally {
+                this.isJoining = false;
             }
         },
         stopFaceScan() {
