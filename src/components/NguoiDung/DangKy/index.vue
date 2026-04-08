@@ -130,6 +130,7 @@
 </template>
 
 <script>
+const apiUrl = import.meta.env.VITE_API_URL;
 import axios from 'axios';
 export default {
     name: 'DangKyNguoiDung',
@@ -170,7 +171,7 @@ export default {
 
             this.isLoading = true;
             try {
-                const res = await axios.post('http://127.0.0.1:8000/api/nguoi-dung/register', this.dang_ky);
+                const res = await axios.post(`${apiUrl}/nguoi-dung/register`, this.dang_ky);
                 if (res.data.status) {
                     if (this.$toast) {
                         this.$toast.success(res.data.message);

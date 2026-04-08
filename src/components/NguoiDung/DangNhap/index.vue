@@ -103,6 +103,7 @@
 </template>
 
 <script>
+const apiUrl = import.meta.env.VITE_API_URL;
 import axios from 'axios';
 export default {
     name: 'DangNhapNguoiDung',
@@ -131,7 +132,7 @@ export default {
         async login() {
             this.isLoading = true;
             try {
-                const res = await axios.post('http://127.0.0.1:8000/api/nguoi-dung/login', this.nguoi_dung);
+                const res = await axios.post(`${apiUrl}/nguoi-dung/login`, this.nguoi_dung);
                 if (res.data.status) {
                     localStorage.setItem('token_nguoi_dung', res.data.data.token);
                     if (this.$toast) {

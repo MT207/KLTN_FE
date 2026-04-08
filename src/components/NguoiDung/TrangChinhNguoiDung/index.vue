@@ -825,6 +825,7 @@
 </template>
 
 <script>
+const apiUrl = import.meta.env.VITE_API_URL;
 import * as faceapi from 'face-api.js';
 import axios  from 'axios';
 export default {
@@ -1032,7 +1033,7 @@ export default {
                 // Dung ngay viec quet de tranh gui API nhieu lan
                 clearInterval(this.vong_lap_nhan_dien); 
 
-                const phan_hoi = await axios.post('http://127.0.0.1:8000/api/nguoi-dung/xac-thuc-khuon-mat', {
+                const phan_hoi = await axios.post(`${apiUrl}/nguoi-dung/xac-thuc-khuon-mat`, {
                     id: this.id_nguoi_dung,
                     du_lieu_khuon_mat: JSON.stringify(mang_so)
                 });
@@ -1095,7 +1096,7 @@ export default {
                     // mo_ta: this.formTaoPhong.mo_ta (Nếu DB bạn có cột này thì bật lên)
                 };
 
-                const response = await axios.post('http://127.0.0.1:8000/api/phong-hop/create', payload);
+                const response = await axios.post(`${apiUrl}/phong-hop/create`, payload);
 
                 if (response.data.status) {
                     if (this.$toast) this.$toast.success("Khởi tạo phòng họp thành công!");
@@ -1119,11 +1120,21 @@ export default {
             }
         },
         async thamGiaPhongHop() {
+            axios
+                .get(`${apiUrl}/phong-hop/ma-phong`, { params: { ma_phong: this.ma_phong_tham_gia } })
+                .then(response => {
+                    if (response.data.status) {
+                        console.log("Mã phòng hợp lệ:", response.data.data.ma_phong);
+                    } else {
+                        console.warn("Mã phòng không tồn tại:", this.ma_phong_tham_gia);
+                    }
+                });
             // 1. Kiểm tra xem người dùng đã nhập mã phòng chưa
             if (!this.ma_phong_tham_gia.trim()) {
                 if (this.$toast) this.$toast.warning("Vui lòng nhập mã phòng họp!");
                 return;
             }
+            
             // 2. BẢO MẬT BẰNG AI: Chặn cửa nếu chưa quét Face ID
             if (!this.da_xac_minh) {
                 if (this.$toast) this.$toast.error("Bảo mật: Vui lòng xác thực khuôn mặt trước khi vào họp!");
@@ -1140,7 +1151,7 @@ export default {
                     user_name: this.ten_nguoi_dung
                 };
 
-                const response = await axios.post('http://127.0.0.1:8000/api/phong-hop/tao-token', payload);
+                const response = await axios.post(`${apiUrl}/phong-hop/tao-token`, payload);
 
                 if (response.data.status) {
                     // 4. Lấy token thành công
@@ -1164,7 +1175,7 @@ export default {
                 this.isJoining = false;
             }
         },
-        kiemTraTruocKhiJoin() {
+        async kiemTraTruocKhiJoin() {
             if (!this.ma_phong_tham_gia.trim()) {
                 this.$toast.warning("Vui lòng nhập mã phòng họp!");
                 return;
@@ -1174,15 +1185,35 @@ export default {
                 this.currentTab = 'dashboard';
                 return;
             }
-            // Mở Modal và kích hoạt Camera
-            this.showJoinAuthModal = true;
-            this.authError = false;
-            this.authScanStatus = 'Đang tải dữ liệu sinh trắc học...';
             
-            // Đợi Vue render DOM (thẻ video) xong thì mới bật cam
-            this.$nextTick(() => {
-                this.batDauXacThucJoin();
-            });
+            this.isJoining = true;
+           try{
+                // Gọi API để kiểm tra mã phòng tồn tại hay không
+                const response = await axios.post(`${apiUrl}/phong-hop/kiem-tra-phong-hop`, {
+                    ma_phong: this.ma_phong_tham_gia.trim()
+                });
+
+                if (response.data.status) {
+                    // NẾU PHÒNG TỒN TẠI -> Mở Modal và kích hoạt Camera
+                    this.showJoinAuthModal = true;
+                    this.authError = false;
+                    this.authScanStatus = 'Đang tải dữ liệu sinh trắc học...';
+
+                    this.$nextTick(() => {
+                        this.batDauXacThucJoin();
+                    });
+                }
+            } catch (error) {
+                // NẾU PHÒNG KHÔNG TỒN TẠI (Lỗi 404) -> Báo lỗi và không làm gì cả
+                let message = "Mã phòng không tồn tại!";
+                if (error.response && error.response.data && error.response.data.message) {
+                    message = error.response.data.message;
+                }
+                if (this.$toast) this.$toast.error(message);
+            } finally {
+                // Tắt vòng xoay loading ở nút Join
+                this.isJoining = false;
+            }
         },
 
         async batDauXacThucJoin() {
@@ -1285,7 +1316,7 @@ export default {
                     ma_phong: this.ma_phong_tham_gia.trim(),
                     user_name: this.ten_nguoi_dung
                 };
-                const response = await axios.post('http://127.0.0.1:8000/api/phong-hop/tao-token', payload);
+                const response = await axios.post(`${apiUrl}/phong-hop/tao-token`, payload);
 
                 if (response.data.status) {
                     sessionStorage.setItem('livekit_token', response.data.token);
@@ -1297,7 +1328,16 @@ export default {
                     window.location.href = `/phong-hop/${this.ma_phong_tham_gia.trim()}`;
                 }
             } catch (error) {
-                if (this.$toast) this.$toast.error("Mã phòng không tồn tại hoặc lỗi server.");
+                let message = "Mã phòng không tồn tại hoặc lỗi máy chủ.";
+                if (error.response && error.response.data && error.response.data.message) {
+                    message = error.response.data.message;
+                }
+                if (this.$toast) {
+                    this.$toast.error(message);
+                }
+                
+                //phòng không tồn tại,  đóng Modal xác thực để người dùng nhập lại
+                this.dongModalXacThucJoin(true);
             } finally {
                 this.isJoining = false;
             }
